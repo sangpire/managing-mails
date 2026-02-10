@@ -1,0 +1,13 @@
+version = 1
+default_account = "kakao"
+
+[[accounts]]
+name = "kakao"
+host = "imap.kakao.com"
+port = 993
+ssl = true
+username = "user@kakao.com"
+password = "CHANGE_ME"
+mailbox = "INBOX"
+default_since_days = 7
+

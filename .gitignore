@@ -1,0 +1,11 @@
+# Secrets
+.secrets/
+**/.secrets/
+
+# Python cache/artifacts
+__pycache__/
+**/__pycache__/
+*.py[cod]
+
+# OS files
+.DS_Store

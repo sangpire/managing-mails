@@ -1,0 +1,4 @@
+interface:
+  display_name: "Managing Mails"
+  short_description: "IMAP 메일 조회/읽기/삭제"
+  default_prompt: "Use $managing-mails to list, read, and delete emails through IMAP with file-based configuration in .secrets/mails.toml."
