@@ -19,21 +19,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 
-def resolve_default_config_path() -> Path:
-    codex_home = os.environ.get("CODEX_HOME")
-    default_base = Path(codex_home).expanduser() if codex_home else Path.home() / ".codex"
-    candidates = [
-        default_base / ".secrets" / "mails.toml",
-        Path.home() / ".codex" / ".secrets" / "mails.toml",
-        Path.cwd() / ".secrets" / "mails.toml",
-    ]
-    for path in candidates:
-        if path.exists():
-            return path
-    return candidates[0]
-
-
-DEFAULT_CONFIG_PATH = resolve_default_config_path()
+CONFIG_PATH_ENV = "MANAGING_MAIL_CONFIG_PATH"
 IMAP_MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 BLOCK_TAGS = {
     "address",
@@ -322,7 +308,7 @@ def parse_cli_args() -> argparse.Namespace:
     parser.add_argument("--limit", type=int, default=20)
     parser.add_argument("--uid")
     parser.add_argument("--query")
-    parser.add_argument("--config", default=str(DEFAULT_CONFIG_PATH))
+    parser.add_argument("--config", help=f"설정 파일 경로 (미지정 시 {CONFIG_PATH_ENV} 사용)")
     parser.add_argument("--include-html", action="store_true")
     parser.add_argument(
         "--no-expunge",
@@ -661,14 +647,28 @@ def resolve_account(
     return account
 
 
+def resolve_config_path(cli_config: str | None) -> Path:
+    if cli_config:
+        return Path(cli_config).expanduser()
+
+    env_config = os.environ.get(CONFIG_PATH_ENV, "").strip()
+    if env_config:
+        return Path(env_config).expanduser()
+
+    raise SkillError(
+        "CONFIG_NOT_FOUND",
+        f"설정 파일 경로가 지정되지 않았습니다. --config 또는 {CONFIG_PATH_ENV}를 사용하세요.",
+    )
+
+
 def main() -> None:
     args = parse_cli_args()
-    config_path = Path(args.config).expanduser()
 
     if args.mode in ("read", "delete") and not args.uid:
         fail("CONFIG_SCHEMA_ERROR", f"--mode {args.mode} 에서는 --uid가 필요합니다.")
 
     try:
+        config_path = resolve_config_path(args.config)
         default_account, accounts = load_config(config_path)
         account = resolve_account(accounts, default_account, args.account)
         mailbox = (args.mailbox or account.mailbox).strip()

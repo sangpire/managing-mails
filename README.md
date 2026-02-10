@@ -19,13 +19,12 @@ IMAP 기반으로 메일 목록 조회, 본문 읽기, UID 삭제를 수행하�
 
 ## 구성 파일
 
-기본 설정 파일 경로는 아래와 같습니다.
+설정 파일 경로는 아래 둘 중 하나로 지정합니다.
 
-- `$CODEX_HOME/.secrets/mails.toml` (권장)
-- `~/.codex/.secrets/mails.toml` (fallback)
-- `./.secrets/mails.toml` (현재 작업 디렉터리 fallback)
+- `--config <path>`
+- `MANAGING_MAIL_CONFIG_PATH=<path>`
 
-별도 경로를 쓰려면 `--config` 옵션을 사용하세요.
+권장 저장 위치 예시: `~/.config/managing-mails/mails.toml`
 
 ### 설정 예시
 
@@ -47,10 +46,10 @@ default_since_days = 7
 ### 권한 설정(Unix/macOS)
 
 ```bash
-mkdir -p .secrets
-cp mails.example.toml .secrets/mails.toml
-chmod 700 .secrets
-chmod 600 .secrets/mails.toml
+mkdir -p ~/.config/managing-mails
+cp mails.example.toml ~/.config/managing-mails/mails.toml
+chmod 700 ~/.config/managing-mails
+chmod 600 ~/.config/managing-mails/mails.toml
 ```
 
 권한이 맞지 않으면 `CONFIG_PERMISSION_DENIED` 오류가 발생합니다.
@@ -64,6 +63,10 @@ chmod 600 .secrets/mails.toml
 ## 실행 방법
 
 저장소 루트에서 실행하는 예시입니다.
+
+```bash
+export MANAGING_MAIL_CONFIG_PATH=~/.config/managing-mails/mails.toml
+```
 
 ### 1) 목록 조회
 
@@ -92,7 +95,8 @@ python3 scripts/imap_read.py --mode delete --uid 12345
 - `--query '<IMAP SEARCH TOKENS>'`: 검색 조건
 - `--include-html`: `read` 결과에 `html_body` 포함
 - `--no-expunge`: `delete` 시 즉시 영구삭제 없이 `\Deleted`만 설정
-- `--config <path>`: 설정 파일 경로 지정
+- `--config <path>`: 설정 파일 경로 지정 (최우선)
+- `MANAGING_MAIL_CONFIG_PATH`: `--config` 미지정 시 사용할 설정 파일 경로
 
 예시:
 
@@ -138,8 +142,7 @@ python3 scripts/imap_read.py --mode list --since 2026-02-01 --query 'FROM "boss@
 
 ## 외부 공유 체크리스트
 
-- `.secrets/`가 저장소에 포함되지 않았는지 확인
-- 실제 계정 비밀번호는 `mails.toml`에만 두고, 공유 시에는 `mails.example.toml`만 제공
+- 실제 계정 비밀번호는 로컬 설정 파일(`~/.config/managing-mails/mails.toml` 등)에만 두고, 공유 시에는 `mails.example.toml`만 제공
 - 폴더 압축 공유 시 `.git/` 폴더 제외 (작성자 이름/이메일 등 로컬 Git 메타데이터 노출 방지)
 
 ## License

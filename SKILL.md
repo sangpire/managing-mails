@@ -1,6 +1,6 @@
 ---
 name: managing-mails
-description: IMAP 프로토콜로 메일함 목록 조회, 본문 읽기, UID 기반 삭제를 수행합니다. 메일 검색, RFC 2047 헤더 디코딩, 파일 기반 설정(`.secrets/mails.toml`)으로 메일을 관리해야 할 때 사용하세요.
+description: IMAP 프로토콜로 메일함 목록 조회, 본문 읽기, UID 기반 삭제를 수행합니다. 메일 검색, RFC 2047 헤더 디코딩, 파일 기반 설정(`MANAGING_MAIL_CONFIG_PATH` 또는 `--config`)으로 메일을 관리해야 할 때 사용하세요.
 allowed-tools: Bash(python3:*), Read, Write
 ---
 
@@ -13,10 +13,11 @@ IMAP 계정 정보를 파일로 로드하여 메일 목록 조회, 본문 읽기
 1. 설정 파일 준비
 
 ```bash
-mkdir -p .secrets
-cp mails.example.toml .secrets/mails.toml
-chmod 700 .secrets
-chmod 600 .secrets/mails.toml
+mkdir -p ~/.config/managing-mails
+cp mails.example.toml ~/.config/managing-mails/mails.toml
+chmod 700 ~/.config/managing-mails
+chmod 600 ~/.config/managing-mails/mails.toml
+export MANAGING_MAIL_CONFIG_PATH=~/.config/managing-mails/mails.toml
 ```
 
 2. 메일 목록 확인
@@ -46,7 +47,8 @@ python3 scripts/imap_read.py --mode delete --uid 12345
 - `--limit N` (기본 20)
 - `--uid <uid>` (`mode=read|delete` 필수)
 - `--query "<search expr>"` (선택)
-- `--config <path>` (선택, 기본 `$CODEX_HOME/.secrets/mails.toml` 또는 `~/.codex/.secrets/mails.toml` 또는 `./.secrets/mails.toml`)
+- `--config <path>` (선택, 지정 시 최우선)
+- `MANAGING_MAIL_CONFIG_PATH` (`--config` 미지정 시 필수 환경변수)
 - `--include-html` (`mode=read`에서 HTML 본문 포함)
 - `--no-expunge` (`mode=delete`에서 즉시 영구삭제 없이 `\Deleted` 플래그만 설정)
 
